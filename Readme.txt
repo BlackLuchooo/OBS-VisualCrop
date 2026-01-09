@@ -32,7 +32,7 @@ Ajustes:
 Arrastra el recuadro verde para posicionar el recorte o utiliza los controles deslizantes para aplicar zoom relativo.
 
 Notas de Desarrollo
-Proyecto desarrollado por Gemini AI & User. Implementado con:
+Proyecto desarrollado por BlackLuchooo. Implementado con:
 
 HTML5 / CSS3 (Sistema de UI adaptable).
 
@@ -76,10 +76,11 @@ Adjustments:
 Drag the green box to position the crop or use the sliders for relative zooming.
 
 Tech Stack
-Developed by Gemini AI & User. Built using:
+Developed by Blackluchooo. Built using:
 
 HTML5 / CSS3 (Adaptive UI system).
 
 Vanilla JavaScript.
+
 
 OBS-WebSocket JS (v5.x Protocol).
