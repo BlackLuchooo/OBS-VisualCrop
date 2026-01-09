@@ -17,28 +17,26 @@ For the best experience, integrate **VisualCrop.html** directly into your OBS in
 3.  **Dock Name:** `Visual Crop`.
 4.  **URL:** Click the `...` button to browse and select your `VisualCrop.html` file, or paste the local path (e.g., `C:/Users/Name/Documents/VisualCrop.html`).
 5.  Click **Apply**.
-6.  **Dock it:** Drag the new window and snap it anywhere in your OBS layout (e.g., next to your Sources or Mixer).
-
-
+6.  **Dock it:** Drag the new window and snap it anywhere in your OBS layout.
 
 ---
 
 ## ✨ Key Features
-* **Visual Interaction:** Drag the green selection box to reposition your crop.
+* **Visual Interaction:** Drag the green selection box to reposition your crop area.
 * **Smart Zoom:** A dedicated slider that zooms in/out while maintaining the aspect ratio and automatically adjusting OBS scale.
 * **Live Preview:** Periodic screenshots of the active source displayed directly in the dock.
 * **Auto-Reconnect:** Remembers your WebSocket IP and Password for seamless sessions.
-* **Vertical Resize:** The preview area adjusts its height to fit your custom dock size.
 
 ---
 
 ## 📖 How to Use
 1.  **Connect:** Open the settings (⚙️) inside the dock, enter your WebSocket password, and connect.
-2.  **Select:** Click on any source in your OBS **Sources list**. The tool will automatically sync.
-3.  **Adjust:**
-    * **Drag** the rectangle to move the visible area.
-    * **Zoom Slider:** Use "Smart Zoom" to enlarge the crop without losing your canvas scale.
-    * **H/V Sliders:** Fine-tune the horizontal and vertical offsets.
+2.  **Preparation (Optional):** You can manually crop your source in OBS (Alt + Drag) to set your desired initial framing. **VisualCrop will detect this and lock that specific aspect ratio** for all subsequent Smart Zoom operations.
+3.  **Select:** Click on any source in your OBS **Sources list**. The tool will automatically sync and load its current transform data.
+4.  **Adjust:**
+    * **Drag** the green rectangle to move the visible area.
+    * **Smart Zoom Slider:** Enlarge or shrink the crop. The tool ensures the source maintains the aspect ratio of your original cut while adjusting the scale in OBS to keep the visual size consistent.
+    * **H/V Sliders:** Fine-tune the horizontal and vertical offsets for pixel-perfect positioning.
 
 ---
 
