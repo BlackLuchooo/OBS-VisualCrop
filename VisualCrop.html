@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OBS Visual Crop - Pro Edition</title>
+    <style>
+        body { background: #1e1e1e; color: #efefef; font-family: 'Segoe UI', sans-serif; padding: 8px; user-select: none; margin: 0; overflow-x: hidden; }
+        .card { background: #2a2a2a; border-radius: 4px; padding: 10px; border: 1px solid #444; position: relative; }
+        
+        #previewContainer { 
+            width: 100%; height: 180px; background: #111; position: relative; overflow: hidden; 
+            display: flex; align-items: center; justify-content: center; border: 1px solid #555; 
+            margin-bottom: 8px; resize: vertical; min-height: 100px; max-height: 600px;
+        }
+
+        #sourceBase { position: absolute; background-color: #444; background-size: cover; pointer-events: none; }
+        #cropRect { position: absolute; cursor: move; border: 2px solid #44ff44; box-shadow: 0 0 0 2000px rgba(0,0,0,0.6); z-index: 2; pointer-events: auto; }
+        
+        #configPanel { background: #333; border-radius: 4px; padding: 8px; margin-bottom: 10px; display: none; border: 1px solid #00aaff; }
+        .config-input { width: 100%; background: #111; border: 1px solid #555; color: white; padding: 4px; margin-top: 4px; border-radius: 2px; box-sizing: border-box; }
+        .btn { cursor: pointer; border: none; border-radius: 3px; padding: 5px; font-size: 10px; font-weight: bold; text-transform: uppercase; margin-top: 5px; width: 100%; }
+        .btn-connect { background: #00aaff; color: white; }
+        .btn-settings { background: #444; color: #ccc; margin-bottom: 5px; }
+        
+        .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; background: #333; padding: 5px; border-radius: 4px; }
+        .source-name { color: #00aaff; font-size: 12px; font-weight: bold; }
+        
+        input[type=range] { width: 100%; cursor: pointer; accent-color: #44ff44; margin: 2px 0; }
+        .label { font-size: 9px; color: #aaa; text-transform: uppercase; display: block; margin-top: 4px; }
+        .zoom-label { color: #00aaff; font-weight: bold; }
+        
+        .values-grid { display: flex; justify-content: space-between; margin-top: 5px; font-size: 9px; font-family: monospace; color: #44ff44; }
+        #status { font-size: 9px; text-align: right; color: #ff4444; font-weight: bold; margin-bottom: 2px; }
+
+        /* ESTILO DE LA FIRMA */
+        .footer-credits {
+            margin-top: 15px;
+            padding-top: 8px;
+            border-top: 1px solid #333;
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+            letter-spacing: 1px;
+        }
+        .footer-credits b { color: #00aaff; }
+    </style>
+</head>
+<body>
+    <div id="status">DESCONECTADO</div>
+    <button class="btn btn-settings" id="toggleConfig">⚙ CONFIGURACIÓN</button>
+
+    <div id="configPanel">
+        <input type="text" id="wsIp" class="config-input" placeholder="IP (127.0.0.1)">
+        <input type="password" id="wsPass" class="config-input" placeholder="Contraseña">
+        <button class="btn btn-connect" id="btnConnect">CONECTAR Y GUARDAR</button>
+    </div>
+
+    <div class="card">
+        <div class="header-row">
+            <span id="sourceName" class="source-name">SIN SELECCIÓN</span>
+            <input type="checkbox" id="previewToggle" checked title="Activar/Desactivar Preview">
+        </div>
+        
+        <div id="previewContainer">
+            <div id="sourceBase"><div id="cropRect"></div></div>
+        </div>
+
+        <span class="label zoom-label">Zoom Relativo</span>
+        <input type="range" id="zoomSlider" min="0" max="400" value="0">
+        
+        <span class="label">Desplazamiento Horizontal</span>
+        <input type="range" id="hSlider" min="0" max="100" value="0">
+
+        <span class="label">Desplazamiento Vertical</span>
+        <input type="range" id="vSlider" min="0" max="100" value="0">
+
+        <div class="values-grid">
+            <span id="valL">L:0</span> <span id="valR">R:0</span>
+            <span id="valT">T:0</span> <span id="valB">B:0</span>
+        </div>
+
+        <div class="footer-credits">
+            DEVELOPED BY <b>BlackLuchooo</b>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/obs-websocket-js"></script>
+    <script>
+        const obs = new OBSWebSocket();
+        let state = { 
+            id: null, scene: null, name: null, 
+            fullW: 0, fullH: 0, scaleUI: 1,
+            lockedAspect: 1, baseScaleX: 1, baseScaleY: 1, baseVisibleW: 0,
+            isDragging: false, currentL:0, currentR:0, currentT:0, currentB:0
+        };
+
+        function loadSavedConfig() {
+            const savedIp = localStorage.getItem('obs_ip');
+            const savedPass = localStorage.getItem('obs_pass');
+            if (savedIp) document.getElementById('wsIp').value = savedIp;
+            if (savedPass) document.getElementById('wsPass').value = savedPass;
+            if (savedIp) conectar();
+        }
+
+        async function conectar() {
+            const ip = document.getElementById('wsIp').value.trim() || '127.0.0.1';
+            const pass = document.getElementById('wsPass').value;
+            try {
+                await obs.connect(`ws://${ip}:4455`, pass);
+                document.getElementById('status').innerText = "CONECTADO";
+                document.getElementById('status').style.color = "#44ff44";
+                document.getElementById('configPanel').style.display = 'none';
+                localStorage.setItem('obs_ip', ip);
+                localStorage.setItem('obs_pass', pass);
+            } catch (e) { 
+                document.getElementById('status').innerText = "ERROR"; 
+                document.getElementById('configPanel').style.display = 'block';
+            }
+        }
+
+        document.getElementById('btnConnect').onclick = conectar;
+        document.getElementById('toggleConfig').onclick = () => {
+            const p = document.getElementById('configPanel');
+            p.style.display = p.style.display === 'block' ? 'none' : 'block';
+        };
+
+        window.onload = loadSavedConfig;
+
+        obs.on('SceneItemSelected', async (data) => {
+            state.id = data.sceneItemId; state.scene = data.sceneName;
+            const resT = await obs.call('GetSceneItemTransform', { sceneName: state.scene, sceneItemId: state.id });
+            const resL = await obs.call('GetSceneItemList', { sceneName: state.scene });
+            state.name = resL.sceneItems.find(i => i.sceneItemId === state.id).sourceName;
+            document.getElementById('sourceName').innerText = state.name.toUpperCase();
+            const t = resT.sceneItemTransform;
+            state.baseScaleX = t.scaleX; state.baseScaleY = t.scaleY;
+            state.fullW = t.sourceWidth; state.fullH = t.sourceHeight;
+            state.lockedAspect = (t.sourceWidth - t.cropLeft - t.cropRight) / (t.sourceHeight - t.cropTop - t.cropBottom);
+            updateUIVisuals(t);
+            recalculateZoomLimits();
+        });
+
+        const previewContainer = document.getElementById('previewContainer');
+        const resizeObserver = new ResizeObserver(() => {
+            if (state.fullW > 0) {
+                updateUIVisuals({
+                    cropLeft: state.currentL, cropRight: state.currentR,
+                    cropTop: state.currentT, cropBottom: state.currentB,
+                    sourceWidth: state.fullW, sourceHeight: state.fullH
+                });
+            }
+        });
+        resizeObserver.observe(previewContainer);
+
+        function updateUIVisuals(t) {
+            state.currentL = t.cropLeft; state.currentR = t.cropRight;
+            state.currentT = t.cropTop; state.currentB = t.cropBottom;
+            state.scaleUI = Math.min((previewContainer.clientWidth - 20) / state.fullW, (previewContainer.clientHeight - 20) / state.fullH);
+            const base = document.getElementById('sourceBase');
+            base.style.width = (state.fullW * state.scaleUI) + "px";
+            base.style.height = (state.fullH * state.scaleUI) + "px";
+            document.getElementById('hSlider').max = Math.max(1, state.currentL + state.currentR);
+            document.getElementById('hSlider').value = state.currentL;
+            document.getElementById('vSlider').max = Math.max(1, state.currentT + state.currentB);
+            document.getElementById('vSlider').value = state.currentT;
+            updateRectVisual(state.currentL, state.currentT);
+            updateLabels(state);
+        }
+
+        function recalculateZoomLimits() {
+            const zSlider = document.getElementById('zoomSlider');
+            const maxOut = Math.min(state.currentL / state.lockedAspect, state.currentR / state.lockedAspect, state.currentT, state.currentB);
+            zSlider.min = -Math.floor(maxOut);
+            zSlider.value = 0;
+        }
+
+        document.getElementById('zoomSlider').onmousedown = () => {
+            state.startCrops = { l: state.currentL, r: state.currentR, t: state.currentT, b: state.currentB };
+            state.baseVisibleW = state.fullW - state.currentL - state.currentR;
+        };
+
+        document.getElementById('zoomSlider').oninput = async (e) => {
+            if (!state.id) return;
+            const val = parseInt(e.target.value);
+            const nL = Math.max(0, Math.round(state.startCrops.l + (val * state.lockedAspect)));
+            const nR = Math.max(0, Math.round(state.startCrops.r + (val * state.lockedAspect)));
+            const nT = Math.max(0, Math.round(state.startCrops.t + val));
+            const nB = Math.max(0, Math.round(state.startCrops.b + val));
+            if ((state.fullW - nL - nR) < 40) return;
+            const factor = state.baseVisibleW / (state.fullW - nL - nR);
+            state.currentL = nL; state.currentR = nR; state.currentT = nT; state.currentB = nB;
+            updateRectVisual(nL, nT); updateLabels(state);
+            await obs.call('SetSceneItemTransform', {
+                sceneName: state.scene, sceneItemId: state.id,
+                sceneItemTransform: { cropLeft: nL, cropRight: nR, cropTop: nT, cropBottom: nB, scaleX: state.baseScaleX * factor, scaleY: state.baseScaleY * factor }
+            });
+        };
+
+        document.getElementById('zoomSlider').onmouseup = async () => {
+            const res = await obs.call('GetSceneItemTransform', { sceneName: state.scene, sceneItemId: state.id });
+            state.baseScaleX = res.sceneItemTransform.scaleX; state.baseScaleY = res.sceneItemTransform.scaleY;
+            updateUIVisuals(res.sceneItemTransform); recalculateZoomLimits();
+        };
+
+        async function applyPositionChange(L, T) {
+            const totalH = state.currentL + state.currentR;
+            const totalV = state.currentT + state.currentB;
+            if (L !== null) { state.currentL = Math.round(L); state.currentR = Math.round(totalH - L); }
+            if (T !== null) { state.currentT = Math.round(T); state.currentB = Math.round(totalV - T); }
+            updateRectVisual(state.currentL, state.currentT); updateLabels(state);
+            await obs.call('SetSceneItemTransform', {
+                sceneName: state.scene, sceneItemId: state.id,
+                sceneItemTransform: { cropLeft: state.currentL, cropRight: state.currentR, cropTop: state.currentT, cropBottom: state.currentB }
+            });
+        }
+
+        document.getElementById('hSlider').oninput = (e) => { applyPositionChange(parseInt(e.target.value), null); recalculateZoomLimits(); };
+        document.getElementById('vSlider').oninput = (e) => { applyPositionChange(null, parseInt(e.target.value)); recalculateZoomLimits(); };
+
+        function updateRectVisual(left, top) {
+            const rect = document.getElementById('cropRect');
+            rect.style.width = ((state.fullW - (state.currentL + state.currentR)) * state.scaleUI) + "px";
+            rect.style.height = ((state.fullH - (state.currentT + state.currentB)) * state.scaleUI) + "px";
+            rect.style.left = (left * state.scaleUI) + "px";
+            rect.style.top = (top * state.scaleUI) + "px";
+        }
+
+        function updateLabels(s) {
+            document.getElementById('valL').innerText = `L:${Math.round(s.currentL)}`;
+            document.getElementById('valR').innerText = `R:${Math.round(s.currentR)}`;
+            document.getElementById('valT').innerText = `T:${Math.round(s.currentT)}`;
+            document.getElementById('valB').innerText = `B:${Math.round(s.currentB)}`;
+        }
+
+        const rect = document.getElementById('cropRect');
+        rect.onmousedown = (e) => { 
+            state.isDragging = true;
+            const rectPos = rect.getBoundingClientRect();
+            state.offsetX = (e.clientX - rectPos.left) / state.scaleUI;
+            state.offsetY = (e.clientY - rectPos.top) / state.scaleUI;
+        };
+        window.onmouseup = () => { if(state.isDragging) { state.isDragging = false; recalculateZoomLimits(); } };
+        window.onmousemove = (e) => {
+            if (!state.isDragging || !state.id) return;
+            const base = document.getElementById('sourceBase').getBoundingClientRect();
+            let nL = Math.max(0, Math.min(((e.clientX - base.left) / state.scaleUI) - state.offsetX, state.currentL + state.currentR));
+            let nT = Math.max(0, Math.min(((e.clientY - base.top) / state.scaleUI) - state.offsetY, state.currentT + state.currentB));
+            applyPositionChange(nL, nT);
+        };
+
+        setInterval(async () => {
+            if (!state.name || state.isDragging || !document.getElementById('previewToggle').checked) return;
+            try {
+                const res = await obs.call('GetSourceScreenshot', { sourceName: state.name, imageFormat: 'jpg', imageWidth: 400 });
+                document.getElementById('sourceBase').style.backgroundImage = `url(${res.imageData})`;
+            } catch (e) {}
+        }, 1000);
+    </script>
+</body>
+</html>
