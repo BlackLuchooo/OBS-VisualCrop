@@ -9,15 +9,15 @@ A specialized tool for OBS Studio that provides a visual, interactive interface 
 
 ---
 
-## 🛠 Setup as OBS Custom Dock (Recommended)
-For the best experience, integrate **VisualCrop.html** directly into your OBS interface:
+## 🛠 Installation & Setup
 
-1.  **Open OBS Studio.**
-2.  Go to the top menu: `Docks` -> `Custom Browser Docks...`.
-3.  **Dock Name:** `Visual Crop`.
-4.  **URL:** Click the `...` button to browse and select your `VisualCrop.html` file, or paste the local path (e.g., `C:/Users/Name/Documents/VisualCrop.html`).
-5.  Click **Apply**.
-6.  **Dock it:** Drag the new window and snap it anywhere in your OBS layout.
+1.  **Download:** Get the latest version of **VisualCrop.html** [right here](https://github.com/BlackLuchooo/OBS-VisualCrop/releases/tag/OBS).
+2.  **OBS Requirement:** Ensure you are using OBS Studio 28.0+ with WebSocket v5 enabled (`Tools` -> `WebSocket Server Settings`).
+3.  **Setup as Custom Dock:**
+    * Go to `Docks` -> `Custom Browser Docks...` in OBS.
+    * **Dock Name:** `Visual Crop`.
+    * **URL:** Select your downloaded `VisualCrop.html` file or paste its local path.
+    * Click **Apply** and dock the window anywhere in your OBS layout.
 
 ---
 
@@ -39,10 +39,6 @@ For the best experience, integrate **VisualCrop.html** directly into your OBS in
     * **H/V Sliders:** Fine-tune the horizontal and vertical offsets for pixel-perfect positioning.
 
 ---
-
-## ⚙️ Requirements
-* **OBS Studio 28.0+** (WebSocket v5 is built-in).
-* **WebSocket Enabled:** `Tools` -> `WebSocket Server Settings` -> `Enable WebSocket Server`.
 
 ## ⚠️ Known Limitations
 * **Groups:** Currently optimized for top-level sources. Support for nested sources inside groups is limited due to OBS WebSocket event reporting.
