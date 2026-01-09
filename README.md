@@ -1,56 +1,54 @@
-# OBS Visual Crop
+# VisualCrop.html (v1.2 Stable)
 
-Interfaz web interactiva diseñada para la gestión visual de recortes (cropping) y zoom de fuentes en **OBS Studio**. Esta herramienta permite realizar ajustes precisos mediante manipulación directa sobre una previsualización, eliminando la configuración manual de parámetros numéricos en los filtros de OBS.
-
----
-
-## Funciones Principales
-
-* **Manipulación Visual Directa**: Define el área de interés moviendo un rectángulo interactivo sobre una previsualización en tiempo real.
-* **Zoom Inteligente con Bloqueo de Aspecto**: Sistema de zoom relativo que mantiene las proporciones originales de la fuente, compensando automáticamente la escala en el lienzo de OBS.
-* **Límites Dinámicos de Seguridad**: Algoritmo de protección que detecta los bordes de la imagen original para evitar recortes negativos o desbordamientos técnicos.
-* **Monitor Resizable**: Contenedor de previsualización ajustable verticalmente para permitir trabajos de alta precisión en áreas pequeñas.
-* **Memoria de Conexión**: Persistencia de credenciales (IP y Contraseña) mediante LocalStorage para reconexión automática.
+A specialized tool for OBS Studio that provides a visual, interactive interface for cropping and scaling sources. Designed to be used as a **Custom Browser Dock** directly inside OBS.
 
 ---
 
-## Requisitos Técnicos
-
-* **OBS Studio**: Versión 28.0 o superior.
-* **Protocolo**: OBS WebSocket v5.x (habilitado en `Herramientas` > `Ajustes de servidor WebSocket`).
-* **Archivo**: `VisualCrop.html` guardado localmente en su ordenador.
+## 🚀 Overview
+**VisualCrop** eliminates the need to manually enter pixel values in the "Edit Transform" window. It provides a real-time "WYSIWYG" (What You See Is What You Get) monitor where you can drag a selection box to crop your sources instantly.
 
 ---
 
-## Guía de Instalación e Integración en OBS
+## 🛠 Setup as OBS Custom Dock (Recommended)
+For the best experience, integrate **VisualCrop.html** directly into your OBS interface:
 
-Para una mejor experiencia, se recomienda integrar esta herramienta como un panel interno de OBS:
+1.  **Open OBS Studio.**
+2.  Go to the top menu: `Docks` -> `Custom Browser Docks...`.
+3.  **Dock Name:** `Visual Crop`.
+4.  **URL:** Click the `...` button to browse and select your `VisualCrop.html` file, or paste the local path (e.g., `C:/Users/Name/Documents/VisualCrop.html`).
+5.  Click **Apply**.
+6.  **Dock it:** Drag the new window and snap it anywhere in your OBS layout (e.g., next to your Sources or Mixer).
 
-1.  **Obtener la ruta del archivo**: 
-    * Localiza el archivo `VisualCrop.html` en tu carpeta.
-    * Haz clic derecho sobre el archivo y selecciona "Copiar como ruta" (o ábrelo en tu navegador y copia la dirección que aparece en la barra de URL, que empezará por `file:///...`).
-2.  **Crear el Panel en OBS**:
-    * En OBS Studio, ve al menú superior `Paneles` (Docks) > `Paneles de navegador personalizados...`.
-    * En **Nombre del panel**, escribe: `Visual Crop`.
-    * En **URL**, pega la ruta que copiaste en el paso 1.
-    * Haz clic en `Aplicar` y cierra la ventana.
-3.  **Configuración Final**:
-    * Aparecerá una nueva ventana flotante. Puedes arrastrarla y acoplarla en cualquier lugar de la interfaz de OBS.
-    * Ingresa la IP y contraseña de tu servidor WebSocket.
-    * **Selecciona cualquier fuente** en tu escena de OBS; la herramienta la detectará y calibrará los controles automáticamente.
+
 
 ---
 
-## Metodología de Desarrollo
-
-La herramienta opera bajo una arquitectura de comunicación asíncrona de baja latencia. El motor principal utiliza una lógica de **compensación de escala inversa**: cuando el usuario reduce el área visible (zoom in), el script calcula el factor de escala necesario para que la fuente mantenga su tamaño percibido en la composición final.
-
-### Tecnologías utilizadas:
-* **Lenguajes**: HTML5, CSS3, JavaScript (Vanilla).
-* **API**: OBS-WebSocket JS (v5.x).
-* **Sincronización**: ResizeObserver API para la interfaz adaptable.
+## ✨ Key Features
+* **Visual Interaction:** Drag the green selection box to reposition your crop.
+* **Smart Zoom:** A dedicated slider that zooms in/out while maintaining the aspect ratio and automatically adjusting OBS scale.
+* **Live Preview:** Periodic screenshots of the active source displayed directly in the dock.
+* **Auto-Reconnect:** Remembers your WebSocket IP and Password for seamless sessions.
+* **Vertical Resize:** The preview area adjusts its height to fit your custom dock size.
 
 ---
 
-### Créditos
-Desarrollado por Blackluchooo.
+## 📖 How to Use
+1.  **Connect:** Open the settings (⚙️) inside the dock, enter your WebSocket password, and connect.
+2.  **Select:** Click on any source in your OBS **Sources list**. The tool will automatically sync.
+3.  **Adjust:**
+    * **Drag** the rectangle to move the visible area.
+    * **Zoom Slider:** Use "Smart Zoom" to enlarge the crop without losing your canvas scale.
+    * **H/V Sliders:** Fine-tune the horizontal and vertical offsets.
+
+---
+
+## ⚙️ Requirements
+* **OBS Studio 28.0+** (WebSocket v5 is built-in).
+* **WebSocket Enabled:** `Tools` -> `WebSocket Server Settings` -> `Enable WebSocket Server`.
+
+## ⚠️ Known Limitations
+* **Groups:** Currently optimized for top-level sources. Support for nested sources inside groups is limited due to OBS WebSocket event reporting.
+
+---
+**Developed by BlackLuchooo**
+*Optimized for OBS Studio Workflow*
